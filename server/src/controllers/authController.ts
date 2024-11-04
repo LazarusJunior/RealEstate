@@ -3,9 +3,10 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/database';
 
-export const register = async (req: Request, res: Response, next: NextFunction) => {
+export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password } = req.body;
+
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
@@ -23,7 +24,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     res.status(500).json({ error: 'Error registering user' });
   }
 };
-export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const login = async (req: Request, res: Response): Promise<void> => {
     try {
       const { email, password } = req.body;
   
@@ -59,7 +60,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     }
   };
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction) => {
+export const getUsers = async (req: Request, res: Response) => {
     try {
         const users = await prisma.user.findMany();
         res.status(200).json(users);
@@ -69,7 +70,7 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction) 
     }
 };
 
-export const getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserById = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         const user = await prisma.user.findUnique({
@@ -86,4 +87,36 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
         console.error('Error fetching user by ID:', error);
         res.status(500).json({ error: 'Error fetching user by ID' });
     }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+try {
+  const { id } = req.params;
+  const { name, email, password } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { id: Number(id) },
+  });
+
+  if (!user) {
+    res.status(404).json({ error: 'User not found' });
+    return;
+  }
+
+  const updatedData: any = { name, email };
+  if (password) {
+    const saltRounds = 10;
+    updatedData.passwordHash = await bcrypt.hash(password, saltRounds);
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: Number(id) },
+    data: updatedData,
+  });
+
+  res.status(200).json(updatedUser);
+} catch (error) {
+  console.error('Error updating user:', error);
+  res.status(500).json({ error: 'Error updating user' });
+}
 };
