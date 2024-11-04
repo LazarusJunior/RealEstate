@@ -13,7 +13,7 @@ export const validate = (req: Request, res: Response, next: NextFunction): void 
 
 // Validator for user registration
 export const userRegistrationValidator:RequestHandler[] = [
-    body('username')
+    body('name')
         .isString()
         .withMessage('Username must be a string')
         .isLength({ min: 3 })
@@ -27,16 +27,6 @@ export const userRegistrationValidator:RequestHandler[] = [
     validate
 ];
 
-// Validator for user login
-export const userLoginValidator = [
-    body('email')
-        .isEmail()
-        .withMessage('Email must be valid'),
-    body('password')
-        .isLength({ min: 6 })
-        .withMessage('Password must be at least 6 characters long'),
-    validate
-];
 
 // Validator for property creation
 export const propertyCreationValidator = [
