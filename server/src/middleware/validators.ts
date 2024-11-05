@@ -27,6 +27,24 @@ export const userRegistrationValidator:RequestHandler[] = [
     validate
 ];
 
+// Validator for updating user information
+export const updateUserValidator: RequestHandler[] = [
+    body('name')
+        .optional()
+        .isString()
+        .withMessage('Username must be a string')
+        .isLength({ min: 3 })
+        .withMessage('Username must be at least 3 characters long'),
+    body('email')
+        .optional()
+        .isEmail()
+        .withMessage('Email must be valid'),
+    body('password')
+        .optional()
+        .isLength({ min: 6 })
+        .withMessage('Password must be at least 6 characters long'),
+    validate
+];
 
 // Validator for property creation
 export const propertyCreationValidator = [
