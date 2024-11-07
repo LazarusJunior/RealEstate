@@ -24,7 +24,7 @@ export const register = async (req: Request, res: Response) => {
 
       const token = generateToken(user.id, user.role); 
 
-      // Set the token in a cookie
+      // Set token in a cookie
       res.cookie('token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // Set secure in production
