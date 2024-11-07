@@ -121,7 +121,7 @@ export const getUserInvestmentHistory = async (req: any, res: Response) => {
         return res.status(404).json({ error: 'No investments found for this user' });
       }
   
-      const investmentsWithOwnership = investments.map(investment => {
+      const investmentsWithOwnership = investments.map((investment: { amount: any; property: { targetInvestment: any; name: any; }; id: any; createdAt: any; }) => {
         const ownershipPercentage = (Number(investment.amount) / Number(investment.property.targetInvestment)) * 100;
   
         return {

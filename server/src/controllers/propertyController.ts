@@ -152,7 +152,7 @@ export const getPropertyDetails = async (req: Request, res: Response) => {
         }
   
       // Calculate total investments for the property
-      const totalInvestments = property.investments.reduce((acc, investment) => acc + Number(investment.amount), 0);
+      const totalInvestments = property.investments.reduce((acc: number, investment: { amount: any; }) => acc + Number(investment.amount), 0);
   
       // Calculate Return on Investment for the property
       const roi = ((totalInvestments / Number(property.targetInvestment)) * 100).toFixed(2);

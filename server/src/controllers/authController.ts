@@ -28,6 +28,7 @@ export const register = async (req: Request, res: Response) => {
       res.cookie('token', token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // Set secure in production
+          sameSite: 'strict',
           maxAge: 24 * 60 * 60 * 1000, // Cookie expires in 1 day
       });
 
@@ -63,6 +64,37 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         res.status(500).json({ error: 'Error logging in user' });
     }
 };
+
+export const logoutUser = async (req: Request, res: Response): Promise<void> => {
+    const token = req.cookies.token;
+  
+    try {
+      if (!token) {
+        res.status(404).json({
+          message: "Token not found"
+        });
+        return;
+      }
+  
+      res.cookie("token", "", {
+        path: "/",
+        httpOnly: true,
+        expires: new Date(0), // Expired date to remove the cookie
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+      });
+  
+      res.status(200).json({
+        message: "Successfully logged out"
+      });
+    } catch (error) {
+      console.error("Logout error:", error);
+      res.status(500).json({
+        message: "Error logging out user"
+      });
+      return
+    }
+  };
 
 export const getUsers = async (req: Request, res: Response) => {
     try {
