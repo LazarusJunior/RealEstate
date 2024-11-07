@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
 import investmentRoutes from './routes/investmentRoutes';
+import auditRoutes from './routes/auditRoutes';
 
 dotenv.config();
 
@@ -16,5 +17,6 @@ app.use(cookieParser());
 app.use('/api/v1/', authRoutes);
 app.use('/api/v1', propertyRoutes);
 app.use('/api/v1', investmentRoutes);
+app.use('/api/v1',auditRoutes);
 
 export default app;

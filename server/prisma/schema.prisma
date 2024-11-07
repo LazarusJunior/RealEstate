@@ -17,6 +17,8 @@ model User {
 
   investments   Investment[]
   transactions  Transaction[]
+
+  AuditLog AuditLog[]
 }
 
 model Property {
@@ -52,4 +54,14 @@ model Transaction {
 enum Role {
   USER
   ADMIN
+}
+
+model AuditLog {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     Int
+  action     String    // Action performed (e.g., 'CREATE', 'DELETE', 'INVEST')
+  target     String    // The target of the action (e.g., 'Property', 'Investment')
+  targetId   Int       // The ID of the target (e.g., property or investment ID)
+  createdAt  DateTime  @default(now())  // When the action was performed
 }
