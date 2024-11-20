@@ -25,63 +25,67 @@ const Profile: React.FC = () => {
       } else {
         toast.error('User ID is missing. Failed to update profile.');
       }
-      toast.success('Profile updated successfully!');
     } catch (error) {
       toast.error('Failed to update profile. Please try again.');
     }
   };
 
   return (
-    <div className="max-w-md mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Update your personal information</CardDescription>
+    <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-gradient-to-b from-blue-50 to-white p-4">
+      <Card className="w-full max-w-md border-blue-100 shadow-lg">
+        <CardHeader className="space-y-1 bg-blue-50 border-b border-blue-100">
+          <CardTitle className="text-2xl font-bold text-blue-950">Profile</CardTitle>
+          <CardDescription className="text-blue-800">Update your personal information</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name" className="text-blue-900">Name</Label>
               <div className="relative">
-                <User className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="name"
                   placeholder="Your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-blue-900">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="Your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">New Password (optional)</Label>
+              <Label htmlFor="password" className="text-blue-900">New Password (optional)</Label>
               <div className="relative">
-                <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="password"
                   type="password"
                   placeholder="New password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full">Update Profile</Button>
+            <Button 
+              type="submit" 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              Update Profile
+            </Button>
           </form>
         </CardContent>
       </Card>

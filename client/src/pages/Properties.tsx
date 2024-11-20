@@ -26,7 +26,7 @@ const Properties: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="container mx-auto p-4 text-gray-600 bg-gray-50">Loading properties...</div>;
+    return <div className="container mx-auto p-4 text-blue-600">Loading properties...</div>;
   }
 
   if (error) {
@@ -34,43 +34,44 @@ const Properties: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6 text-teal-900">Available Properties</h1>
+    <div className="container mx-auto p-4 bg-white">
+      <h1 className="text-3xl font-bold mb-6 text-blue-950">Available Properties</h1>
       {properties.length === 0 ? (
-        <p className="text-gray-600">No properties available at the moment.</p>
+        <p className="text-blue-900">No properties available at the moment.</p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {properties.map((property) => (
             <Card 
               key={property.id} 
-              className="flex flex-col border-gray-300 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl"
+              className="flex flex-col border-blue-100 bg-white shadow-md hover:shadow-lg transition-shadow duration-300 rounded-xl"
             >
-              <CardHeader className="bg-teal-50 border-b border-teal-100 rounded-t-xl">
-                <CardTitle className="flex items-center text-teal-900">
-                  <Building className="mr-2 text-teal-700" />
+              <CardHeader className="bg-blue-50 border-b border-blue-100 rounded-t-xl">
+                <CardTitle className="flex items-center text-blue-950">
+                  <Building className="mr-2 text-blue-600" />
                   {property.name}
                 </CardTitle>
-                <CardDescription className="flex items-center text-teal-800">
-                  <MapPin className="mr-2 text-teal-600" size={16} />
+                <CardDescription className="flex items-center text-blue-800">
+                  <MapPin className="mr-2 text-blue-500" size={16} />
                   {property.location}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
-                <p className="mb-4 text-gray-700">{property.description}</p>
+                <p className="mb-4 text-blue-900">{property.description}</p>
                 <div className="flex justify-between items-center mb-2">
-                  <span className="text-sm font-medium text-gray-600">Investment Progress</span>
-                  <span className="text-sm font-medium text-teal-900">
+                  <span className="text-sm font-medium text-blue-800">Investment Progress</span>
+                  <span className="text-sm font-medium text-blue-950">
                     ${property.totalInvestments?.toLocaleString() ?? 0} / ${property.targetInvestment?.toLocaleString() ?? 0}
                   </span>
                 </div>
                 <Progress 
                   value={((property.totalInvestments ?? 0) / (property.targetInvestment ?? 1)) * 100} 
-                  className="mb-4 bg-gray-200"
+                  className="mb-4 bg-blue-100"
+                  // indicatorClassName="bg-blue-600"
                 />
               </CardContent>
               <CardFooter className="mt-auto">
                 <Button 
-                  className="w-full bg-teal-700 hover:bg-teal-800 text-white" 
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white" 
                   onClick={() => handleInvestClick(property)}
                 >
                   <DollarSign className="mr-2" />

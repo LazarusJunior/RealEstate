@@ -29,68 +29,72 @@ const Signup: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
-          <CardDescription>Enter your details to sign up</CardDescription>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-white">
+      <Card className="w-full max-w-md border-blue-100 shadow-lg">
+        <CardHeader className="space-y-1 bg-blue-50 border-b border-blue-100">
+          <CardTitle className="text-2xl font-bold text-blue-950">Create an account</CardTitle>
+          <CardDescription className="text-blue-800">Enter your details to sign up</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name" className="text-blue-900">Name</Label>
               <div className="relative">
-                <User className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="name"
-                  placeholder="John Doe"
+                  type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                   required
                 />
               </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-blue-900">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="john@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                   required
                 />
               </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password" className="text-blue-900">Password</Label>
               <div className="relative">
-                <Lock className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-blue-400" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-8"
+                  className="pl-10 border-blue-200 focus:border-blue-400 focus:ring-blue-400"
                   required
                 />
               </div>
             </div>
-            <Button type="submit" className="w-full">
-              <UserPlus className="mr-2 h-4 w-4" />
+
+            <Button 
+              type="submit" 
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white transition-colors"
+            >
+              <UserPlus className="mr-2" size={18} />
               Sign Up
             </Button>
           </form>
         </CardContent>
-        <CardFooter>
-          <p className="text-sm text-center w-full">
+        <CardFooter className="border-t border-blue-100 bg-blue-50">
+          <p className="text-sm text-center w-full text-blue-900">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary hover:underline">
+            <Link to="/login" className="text-blue-600 hover:text-blue-700 font-medium hover:underline">
               Log in
             </Link>
           </p>
