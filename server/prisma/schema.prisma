@@ -29,6 +29,7 @@ model Property {
   createdAt        DateTime  @default(now())
   
   investments      Investment[]
+  
 }
 
 model Investment {
