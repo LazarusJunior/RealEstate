@@ -103,14 +103,14 @@ export const updateProperty = async (req: Request, res: Response) => {
 
 export const deleteProperty = async (req: Request, res: Response) => {
     try {
-        //Retrieve active user
+        // Retrieve active user
         const user = await activeUser(req, res);
         
-        //Check if user is admin
+        // Check if user is admin
         if (!user || user.role !== 'ADMIN') {
-             res.status(403).json({ error: 'Admin access required' });
-             return
-            }
+            res.status(403).json({ error: 'Admin access required' });
+            return;
+        }
 
         const id = Number(req.params.id);
         const property = await prisma.property.findUnique({
@@ -122,6 +122,12 @@ export const deleteProperty = async (req: Request, res: Response) => {
             return;
         }
 
+        // Delete related investments
+        await prisma.investment.deleteMany({
+            where: { propertyId: id },
+        });
+
+        // Now delete the property
         await prisma.property.delete({
             where: { id },
         });
@@ -132,6 +138,7 @@ export const deleteProperty = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Error deleting property' });
     }
 }
+
 
 
 export const getPropertyDetails = async (req: Request, res: Response) => {

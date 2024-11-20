@@ -5,7 +5,7 @@ import { adminCheck } from '../middleware/adminCheck';
 
 const router = Router();
 
-// Investment routes with audit logging
+// Investment routes 
 router.post('/createInvestment', authenticateJWT,  createInvestment);
 router.get('/investments/user', authenticateJWT,  getUserInvestments); 
 router.get('/getAllInvestments', authenticateJWT, adminCheck,  getAllInvestments); // Admin only

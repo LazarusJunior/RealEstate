@@ -43,6 +43,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = req.body;
 
+        // Find user by email
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
             console.error('User not found:', email);
@@ -50,6 +51,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Validate password
         const isPasswordValid = await comparePasswords(password, user.passwordHash); 
         if (!isPasswordValid) {
             console.error('Invalid password for user:', email);
@@ -57,9 +59,19 @@ export const login = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
+        // Generate JWT token
         const token = generateToken(user.id, user.role); 
+
+        // Send response with user details and role
         res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
-        res.status(200).json({ message: 'Login successful', token });
+        res.status(200).json({
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role, // Include the role in the response
+            },
+        });
     } catch (error) {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Error logging in user' });
@@ -204,3 +216,4 @@ export const assignAdmin = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Error assigning admin role' });
     }
 };
+

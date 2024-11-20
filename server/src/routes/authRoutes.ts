@@ -18,14 +18,6 @@ router.patch('/updateUser/:id', updateUserValidator, updateUser);
 router.delete('/deleteUser/:id', deleteUser);
 router.post('/assignAdmin/:id', assignAdmin);
 
-// // Protected route (authenticated users only)
-// router.get('/profile', authenticateJWT, (req:any, res:Response) => {
-//     res.json({ message: 'User profile', user: req.user });
-// });
 
-// // Admin only route
-// router.get('/admin', authenticateJWT, adminCheck, (req, res) => {
-//     res.json({ message: 'Admin data' });
-// });
 
 export default router;
