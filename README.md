@@ -55,6 +55,7 @@ The system supports both user and admin roles with role-based access control.
 ### Frontend
 - **React** with **TypeScript**: Component-based architecture with type safety.
 - **Tailwind CSS**: For responsive and modern UI styling.
+- **shadcn/ui**
 
 ---
 
