@@ -1,0 +1,16 @@
+{
+    "extends": "./tsconfig.app.json", 
+    "compilerOptions": {
+      "target": "ESNext",
+      "module": "ESNext",
+      "moduleResolution": "Node",
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "strict": true
+    },
+    "include": [
+      "cypress/**/*.ts",
+      "cypress.config.ts"
+    ]
+  }
+  

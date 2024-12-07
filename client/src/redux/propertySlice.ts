@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { api } from '../services/api';
+import { Investment } from '../types';
 
 interface Property {
   id: number;
@@ -7,7 +8,9 @@ interface Property {
   description: string;
   location: string;
   targetInvestment: number;
-  totalInvestments: number;
+  investments?: Investment[];
+  currentValue?: number;
+  
 }
 
 interface PropertyState {
@@ -29,11 +32,12 @@ export const fetchProperties = createAsyncThunk('properties/fetchProperties', as
 
 export const createProperty = createAsyncThunk(
   'properties/createProperty',
-  async (propertyData: Omit<Property, 'id' | 'totalInvestments'>) => {
+  async (propertyData: Omit<Property, 'id' | 'investments'>) => {
     const response = await api.post('/createProperty', propertyData);
     return response.data.property;
   }
 );
+
 
 export const deleteProperty = createAsyncThunk('properties/deleteProperty',async (propertyId: number) => {
     await api.delete(`/deleteProperty/${propertyId}`);

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { api } from '../services/api';
 
 interface User {
+  isAdmin: any;
   id: number;
   name: string;
   email: string;
