@@ -5,12 +5,10 @@ import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '../redux/store'
 import { fetchProperties, createProperty, deleteProperty } from '../redux/propertySlice'
 import { fetchAllUsers, deleteUser, assignAdminRole } from '../redux/userSlice'
+import { fetchAllInvestments } from '../redux/investmentSlice'
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
-import { Label } from '../components/ui/label'
-import { Textarea } from '../components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
+import { Switch } from '../components/ui/switch'
 import {
   Table,
   TableBody,
@@ -19,8 +17,18 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table'
-import { Building, Users, Trash2, Plus, MapPin, DollarSign } from 'lucide-react'
+import { Building, Users, MapPin, DollarSign, Trash2, UserPlus, Plus } from 'lucide-react'
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Textarea } from '../components/ui/textarea'
 import { toast } from 'react-hot-toast'
+
+interface Investment {
+  id: number
+  propertyId: number
+  amount: number
+}
 
 interface Property {
   id: number
@@ -28,270 +36,339 @@ interface Property {
   description: string
   location: string
   targetInvestment: number
-  totalInvestments: number
+  investments?: Investment[]
 }
 
+interface User {
+  id: number
+  name: string
+  email: string
+  role: string
+}
 
 const AdminDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>()
-  const { user } = useSelector((state: RootState) => state.auth)
-  const properties = useSelector((state: RootState) => state.properties.properties)
-  const propertiesLoading = useSelector((state: RootState) => state.properties.loading)
-  const propertiesError = useSelector((state: RootState) => state.properties.error)
-  const users = useSelector((state: RootState) => state.users.users)
-  const usersLoading = useSelector((state: RootState) => state.users.loading)
-  const usersError = useSelector((state: RootState) => state.users.error)
-
-  const [activeTab, setActiveTab] = useState('properties')
-  const [newProperty, setNewProperty] = useState<Partial<Property>>({})
+  const { properties } = useSelector((state: RootState) => state.properties)
+  const { users } = useSelector((state: RootState) => state.users)
+  const { investments } = useSelector((state: RootState) => state.investments)
+  const [activeTab, setActiveTab] = useState('dashboard')
+  const [darkMode, setDarkMode] = useState(false)
+  const [newProperty, setNewProperty] = useState<Partial<Property>>({
+    name: '',
+    description: '',
+    location: '',
+    targetInvestment: 0
+  })
 
   useEffect(() => {
     dispatch(fetchProperties())
     dispatch(fetchAllUsers())
+    dispatch(fetchAllInvestments())
   }, [dispatch])
 
-  const handleAddProperty = async (e: React.FormEvent) => {
-    e.preventDefault()
-    try {
-      if (newProperty.name && newProperty.description && newProperty.location && newProperty.targetInvestment !== undefined) {
-        await dispatch(createProperty(newProperty as Omit<Property, "id" | "totalInvestments">)).unwrap()
-        toast.success('Property added successfully')
-        setNewProperty({})
-      } else {
-        toast.error('Please fill in all required fields')
-      }
-    } catch (error) {
-      toast.error('Failed to add property')
+  // Calculate total investments per property
+  const propertyInvestments = properties.map(property => {
+    const propertyInvestments = investments.filter(inv => inv.propertyId === property.id)
+    const totalInvestment = propertyInvestments.reduce((sum, inv) => sum + Number(inv.amount), 0)
+    return {
+      ...property,
+      currentValue: totalInvestment
     }
-  }
+  })
 
-  const handleDeleteProperty = async (propertyId: number) => {
+  // Calculate total investment across all properties
+  const totalInvestment = propertyInvestments.reduce((sum, property) => sum + (property.currentValue || 0), 0)
+  const totalTargetInvestment = properties.reduce((sum, property) => sum + Number(property.targetInvestment), 0)
+const handleCreateProperty = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    if (
+      newProperty.name &&
+      newProperty.description &&
+      newProperty.location &&
+      newProperty.targetInvestment !== undefined
+    ) {
+      const propertyData: Omit<Property, "id" | "investments"> = {
+        name: newProperty.name,
+        description: newProperty.description,
+        location: newProperty.location,
+        targetInvestment: newProperty.targetInvestment,
+      };
+      await dispatch(createProperty(propertyData)).unwrap();
+      toast.success("Property created successfully");
+      setNewProperty({
+        name: "",
+        description: "",
+        location: "",
+        targetInvestment: 0,
+      });
+    } else {
+      toast.error("Please fill in all fields");
+    }
+  } catch (error) {
+    toast.error("Failed to create property");
+  }
+};
+
+  const handleDeleteProperty = async (id: number) => {
     try {
-      await dispatch(deleteProperty(propertyId)).unwrap()
+      await dispatch(deleteProperty(id)).unwrap()
       toast.success('Property deleted successfully')
     } catch (error) {
       toast.error('Failed to delete property')
     }
   }
 
-  const handleDeleteUser = async (userId: number) => {
+  const handleDeleteUser = async (id: number) => {
     try {
-      await dispatch(deleteUser(userId)).unwrap()
+      await dispatch(deleteUser(id)).unwrap()
       toast.success('User deleted successfully')
     } catch (error) {
       toast.error('Failed to delete user')
     }
   }
 
-  const handleAssignAdmin = async (userId: number) => {
+  const handleAssignAdmin = async (id: number) => {
     try {
-      await dispatch(assignAdminRole(userId)).unwrap()
+      await dispatch(assignAdminRole(id)).unwrap()
       toast.success('Admin role assigned successfully')
     } catch (error) {
       toast.error('Failed to assign admin role')
     }
   }
 
-  if (propertiesLoading || usersLoading) {
-    return <div className="text-center py-10">Loading...</div>
-  }
-
-  if (propertiesError || usersError) {
-    return <div className="text-center py-10 text-red-500">Error: {propertiesError || usersError}</div>
-  }
-
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-500">Welcome back, {user?.name || 'Admin'}</p>
-        </div>
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            {users?.length || 0} Users
-          </Button>
-          <Button variant="outline" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
-            {properties?.length || 0} Properties
-          </Button>
+    <div className={`min-h-screen p-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'}`}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <span>{darkMode ? 'Dark' : 'Light'} Mode</span>
+          <Switch checked={darkMode} onCheckedChange={setDarkMode} />
         </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
-          <TabsTrigger value="properties" className="flex items-center gap-2">
-            <Building className="h-4 w-4" />
+          <TabsTrigger value="dashboard">
+            <Building className="h-4 w-4 mr-2" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="properties">
+            <Building className="h-4 w-4 mr-2" />
             Properties
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
+          <TabsTrigger value="users">
+            <Users className="h-4 w-4 mr-2" />
             Users
+          </TabsTrigger>
+          <TabsTrigger value="create-property">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Property
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="properties" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Add New Property</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleAddProperty} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="propertyName">Property Name</Label>
-                    <Input
-                      id="propertyName"
-                      value={newProperty.name || ''}
-                      onChange={(e) => setNewProperty({ ...newProperty, name: e.target.value })}
-                      placeholder="Enter property name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input
-                      id="location"
-                      value={newProperty.location || ''}
-                      onChange={(e) => setNewProperty({ ...newProperty, location: e.target.value })}
-                      placeholder="Enter location"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="targetInvestment">Target Investment ($)</Label>
-                    <Input
-                      id="targetInvestment"
-                      type="number"
-                      value={newProperty.targetInvestment || ''}
-                      onChange={(e) => setNewProperty({ ...newProperty, targetInvestment: Number(e.target.value) })}
-                      placeholder="Enter target investment"
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      value={newProperty.description || ''}
-                      onChange={(e) => setNewProperty({ ...newProperty, description: e.target.value })}
-                      placeholder="Enter property description"
-                    />
-                  </div>
+        <TabsContent value="dashboard" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className={darkMode ? 'bg-gray-800' : ''}>
+              <CardHeader>
+                <CardTitle className={`text-lg ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+                  Total Properties
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                  {properties.length}
                 </div>
-                <Button type="submit" className="w-full md:w-auto">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Property
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+            
+            <Card className={darkMode ? 'bg-gray-800' : ''}>
+              <CardHeader>
+                <CardTitle className={`text-lg ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+                  Total Users
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                  {users.length}
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className={darkMode ? 'bg-gray-800' : ''}>
+              <CardHeader>
+                <CardTitle className={`text-lg ${darkMode ? 'text-gray-100' : 'text-gray-700'}`}>
+                  Total Investment
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`text-3xl font-bold ${darkMode ? 'text-yellow-400' : 'text-yellow-600'}`}>
+                  ${totalInvestment.toLocaleString()}
+                </div>
+                <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Target: ${totalTargetInvestment.toLocaleString()}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-          <Card>
+        <TabsContent value="properties" className="space-y-6">
+          <Card className={darkMode ? 'bg-gray-800' : ''}>
             <CardHeader>
-              <CardTitle>All Properties</CardTitle>
+              <CardTitle className={darkMode ? 'text-white' : ''}>All Properties</CardTitle>
             </CardHeader>
             <CardContent>
-              {properties && properties.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Property</TableHead>
-                      <TableHead>Location</TableHead>
-                      <TableHead>Target Investment</TableHead>
-                      <TableHead>Current Investment</TableHead>
-                      <TableHead>Actions</TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Property</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Location</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Target Investment</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Current Investment</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {propertyInvestments.map((property) => (
+                    <TableRow key={property.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}>
+                      <TableCell className={`font-medium ${darkMode ? 'text-white' : ''}`}>
+                        {property.name}
+                      </TableCell>
+                      <TableCell className={darkMode ? 'text-gray-300' : ''}>
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-2 text-gray-500" />
+                          {property.location}
+                        </div>
+                      </TableCell>
+                      <TableCell className={darkMode ? 'text-gray-300' : ''}>
+                        <div className={`flex items-center ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          {Number(property.targetInvestment).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell className={darkMode ? 'text-gray-300' : ''}>
+                        <div className={`flex items-center ${darkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+                          <DollarSign className="h-4 w-4 mr-1" />
+                          {(property.currentValue || 0).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteProperty(property.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {properties.map((property) => (
-                      <TableRow key={property.id}>
-                        <TableCell className="font-medium">{property.name}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2 text-gray-500" />
-                            {property.location}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center text-green-600">
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            {(property.targetInvestment || 0).toLocaleString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center text-blue-600">
-                            <DollarSign className="h-4 w-4 mr-1" />
-                            {(property.totalInvestments || 0).toLocaleString()}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteProperty(property.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-center py-4">No properties found.</p>
-              )}
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="users" className="space-y-4">
-          <Card>
+        <TabsContent value="users" className="space-y-6">
+          <Card className={darkMode ? 'bg-gray-800' : ''}>
             <CardHeader>
-              <CardTitle>All Users</CardTitle>
+              <CardTitle className={darkMode ? 'text-white' : ''}>All Users</CardTitle>
             </CardHeader>
             <CardContent>
-              {users && users.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>{user.role}</TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Name</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Email</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Role</TableHead>
+                    <TableHead className={darkMode ? 'text-gray-300' : ''}>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {users.map((user: User) => (
+                    <TableRow key={user.id} className={darkMode ? 'hover:bg-gray-700' : 'hover:bg-gray-100'}>
+                      <TableCell className={`font-medium ${darkMode ? 'text-white' : ''}`}>
+                        {user.name}
+                      </TableCell>
+                      <TableCell className={darkMode ? 'text-gray-300' : ''}>{user.email}</TableCell>
+                      <TableCell className={darkMode ? 'text-gray-300' : ''}>{user.role}</TableCell>
+                      <TableCell>
+                        <div className="flex space-x-2">
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                          {user.role !== 'ADMIN' && (
                             <Button
-                              variant="destructive"
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleDeleteUser(user.id)}
+                              onClick={() => handleAssignAdmin(user.id)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <UserPlus className="h-4 w-4" />
                             </Button>
-                            {user.role !== 'ADMIN' && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleAssignAdmin(user.id)}
-                              >
-                                Assign Admin
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <p className="text-center py-4">No users found.</p>
-              )}
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="create-property" className="space-y-6">
+          <Card className={darkMode ? 'bg-gray-800' : ''}>
+            <CardHeader>
+              <CardTitle className={darkMode ? 'text-white' : ''}>Create New Property</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleCreateProperty} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className={darkMode ? 'text-gray-300' : ''}>Property Name</Label>
+                  <Input
+                    id="name"
+                    value={newProperty.name}
+                    onChange={(e) => setNewProperty({ ...newProperty, name: e.target.value })}
+                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="description" className={darkMode ? 'text-gray-300' : ''}>Description</Label>
+                  <Textarea
+                    id="description"
+                    value={newProperty.description}
+                    onChange={(e) => setNewProperty({ ...newProperty, description: e.target.value })}
+                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="location" className={darkMode ? 'text-gray-300' : ''}>Location</Label>
+                  <Input
+                    id="location"
+                    value={newProperty.location}
+                    onChange={(e) => setNewProperty({ ...newProperty, location: e.target.value })}
+                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="targetInvestment" className={darkMode ? 'text-gray-300' : ''}>Target Investment</Label>
+                  <Input
+                    id="targetInvestment"
+                    type="number"
+                    value={newProperty.targetInvestment}
+                    onChange={(e) => setNewProperty({ ...newProperty, targetInvestment: Number(e.target.value) })}
+                    className={darkMode ? 'bg-gray-700 text-white' : ''}
+                  />
+                </div>
+                <Button type="submit" className={darkMode ? 'bg-blue-600 hover:bg-blue-700' : ''}>
+                  Create Property
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </TabsContent>
@@ -301,3 +378,4 @@ const AdminDashboard: React.FC = () => {
 }
 
 export default AdminDashboard
+

@@ -8,6 +8,7 @@ interface Investment {
   propertyId: number;
   createdAt: string;
   property: {
+    id: any;
     name: string;
     targetInvestment: number;
   };

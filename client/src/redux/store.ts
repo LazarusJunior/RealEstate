@@ -5,6 +5,7 @@ import authReducer from './authSlice';
 import propertyReducer from './propertySlice';
 import investmentReducer from './investmentSlice';
 import userReducer from './userSlice';
+import userAccountReducer from './userAccountSlice';
 
 const persistConfig = {
   key: 'root',
@@ -20,6 +21,7 @@ export const store = configureStore({
     properties: propertyReducer,
     investments: investmentReducer,
     users: userReducer,
+    userAccount: userAccountReducer,
   },
 });
 
